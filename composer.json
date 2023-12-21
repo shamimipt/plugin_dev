@@ -1,0 +1,19 @@
+{
+  "name": "shamimipt/wp_crud",
+  "description": "A simple wp crud plugin",
+  "type": "wordpress-plugin",
+  "license": "GPLv2",
+  "autoload": {
+    "psr-4": {
+      "Shamimipt\\WpCrud\\": "includes/"
+    }
+  },
+  "authors": [
+    {
+      "name": "khondokar shamim ahmed",
+      "email": "shamimipt@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {}
+}
