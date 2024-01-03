@@ -77,11 +77,8 @@ final class wpCrud {
 	 *  do stuff at plugin install
 	 */
 	public function active() {
-		$installed = get_option( 'wp_crud_installed_time' );
-		if ( ! $installed ) {
-			update_option( 'wp_crud_installed_time', time() );
-		}
-		update_option( 'wp_crud_version', WP_CRUD_VERSION );
+		$installer = new \Shamimipt\WpCrud\Installer();
+		$installer->run();
 	}
 
 	public function init_plugins() {
