@@ -3,6 +3,10 @@
 function ac_insert_address( $args = [] ) {
 	global $wpdb;
 
+	if ( empty($args['name']) ) {
+		return new \WP_Error('invalid-name', __( 'you must provide a valid name' ), 'wpcrud' );
+	}
+
 	$defaults = [
 		'name'       => '',
 		'address'    => '',
@@ -11,13 +15,23 @@ function ac_insert_address( $args = [] ) {
 		'created_at' => current_time( 'mysql' ),
 	];
 
-	$data = wp_parse_args($args, $defaults);
+	$i_data = wp_parse_args($args, $defaults);
 
-	$wpdb->insert(
+	$inserted = $wpdb->insert(
 		"{$wpdb->prefix}ac_adddress",
-		$data,
+		$i_data,
 		[
-			'%s', '%s', '%s', '%d', '%s'
+			'%s',
+			'%s',
+			'%s',
+			'%d',
+			'%s'
 		],
 	);
+
+	if (! $inserted) {
+		return new \WP_Error('failed-to-insert', __('Failed to insert','wpcrud'));
+	}
+
+	return $wpdb->insert_id;
 }
