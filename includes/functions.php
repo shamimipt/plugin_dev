@@ -1,10 +1,17 @@
 <?php
 
+/**
+ * Insert Data into table
+ *
+ * @param array $args
+ *
+ * @return int|WP_Error
+ */
 function ac_insert_address( $args = [] ) {
 	global $wpdb;
 
-	if ( empty($args['name']) ) {
-		return new \WP_Error('invalid-name', __( 'you must provide a valid name' ), 'wpcrud' );
+	if ( empty( $args['name'] ) ) {
+		return new \WP_Error( 'invalid-name', __( 'you must provide a valid name' ), 'wpcrud' );
 	}
 
 	$defaults = [
@@ -15,7 +22,7 @@ function ac_insert_address( $args = [] ) {
 		'created_at' => current_time( 'mysql' ),
 	];
 
-	$i_data = wp_parse_args($args, $defaults);
+	$i_data = wp_parse_args( $args, $defaults );
 
 	$inserted = $wpdb->insert(
 		"{$wpdb->prefix}ac_adddress",
@@ -29,9 +36,38 @@ function ac_insert_address( $args = [] ) {
 		],
 	);
 
-	if (! $inserted) {
-		return new \WP_Error('failed-to-insert', __('Failed to insert','wpcrud'));
+	if ( ! $inserted ) {
+		return new \WP_Error( 'failed-to-insert', __( 'Failed to insert', 'wpcrud' ) );
 	}
 
 	return $wpdb->insert_id;
+}
+
+function ac_get_address( $args = [] ) {
+	global $wpdb;
+
+	$defaults = [
+		'number'  => 20,
+		'offset'  => 0,
+		'orderby' => 'id',
+		'order'   => 'ASC',
+	];
+
+	$args = wp_parse_args( $args, $defaults );
+
+	$items = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}ac_address ORDER BY %s %s LIMIT %d %d",
+			$args['orderby'], $args['order'], $args['offset'], $args['number']
+		)
+	);
+
+	return $args;
+
+}
+
+function ac_address_count() {
+	global $wpdb;
+
+	return (int) $wpdb->get_var("SELECT count(id) FROM {$wpdb->prefix}ac_address" );
 }

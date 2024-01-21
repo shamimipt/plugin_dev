@@ -11,7 +11,7 @@ class Admin{
 		new Admin\Menu( $addressbook );
 	}
 
-	public function dispatch_actions( $addressbook ){
+	public function dispatch_actions( $addressbook ) {
 		add_action('admin_init',[$addressbook,'handle_form']);
 	}
 }
