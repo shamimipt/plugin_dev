@@ -25,12 +25,30 @@ class Address_List extends \WP_List_Table {
 		];
 	}
 
+	protected function column_default($item, $column_name){
+		switch ( $column_name ) {
+			case 'value' :
+				break;
+
+			default:
+				return isset( $item->$column_name ) ? $item->$column_name : '';
+		}
+	}
+
 	public function prepare_items() {
 		$column = $this->get_columns();
 		$hidden = [];
 		$sortable = $this->get_sortable_columns();
 
 		$this->_column_headers = [ $column, $hidden, $sortable ];
+
+		$per_page = 20;
+
+		$this->items = ac_get_address();
+		$this->set_pagination_args( [
+			'total_items' => ac_address_count(),
+			'per_page'    => $per_page
+		] );
 	}
 
 }

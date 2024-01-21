@@ -25,7 +25,7 @@ function ac_insert_address( $args = [] ) {
 	$i_data = wp_parse_args( $args, $defaults );
 
 	$inserted = $wpdb->insert(
-		"{$wpdb->prefix}ac_adddress",
+		"{$wpdb->prefix}ac_address",
 		$i_data,
 		[
 			'%s',
@@ -57,12 +57,14 @@ function ac_get_address( $args = [] ) {
 
 	$items = $wpdb->get_results(
 		$wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}ac_address ORDER BY %s %s LIMIT %d %d",
+			"SELECT * FROM {$wpdb->prefix}ac_address 
+			ORDER BY %s %s 
+			LIMIT %d, %d",
 			$args['orderby'], $args['order'], $args['offset'], $args['number']
 		)
 	);
 
-	return $args;
+	return $items;
 
 }
 

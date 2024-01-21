@@ -25,7 +25,7 @@ class Installer{
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$db_schema = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ac_adddress` (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT , 
+		$db_schema = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}ac_address` (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT , 
 						`name` VARCHAR(100) NULL , 
 						`address` VARCHAR(255) NULL , 
 						`phone` VARCHAR(30) NOT NULL , 
