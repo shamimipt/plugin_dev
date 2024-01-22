@@ -58,9 +58,9 @@ function ac_get_address( $args = [] ) {
 	$items = $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT * FROM {$wpdb->prefix}ac_address 
-			ORDER BY %s %s 
+			ORDER BY {$args['orderby']} {$args['order']}
 			LIMIT %d, %d",
-			$args['orderby'], $args['order'], $args['offset'], $args['number']
+			$args['offset'], $args['number']
 		)
 	);
 
