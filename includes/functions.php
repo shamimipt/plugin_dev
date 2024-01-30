@@ -68,8 +68,18 @@ function ac_get_address( $args = [] ) {
 
 }
 
-function ac_address_count() {
+function ac_address_count(): int {
 	global $wpdb;
 
 	return (int) $wpdb->get_var("SELECT count(id) FROM {$wpdb->prefix}ac_address" );
+}
+
+function ac_delete_address( $id ): mysqli_result|bool|int|null {
+	global $wpdb;
+
+	return $wpdb->delete(
+		$wpdb->prefix . 'ac_address',
+		['id' => $id],
+		['%d']
+	);
 }

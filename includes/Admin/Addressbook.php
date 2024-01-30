@@ -2,8 +2,11 @@
 
 namespace Shamimipt\WpCrud\Admin;
 
+use Shamimipt\WpCrud\Traits\Form_Error;
+
 class Addressbook {
-	public $errors = [];
+
+	use Form_Error;
 
 	public function plugin_page() {
 
