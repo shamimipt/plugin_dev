@@ -2,7 +2,7 @@
 
 namespace Shamimipt\WpCrud\Traits;
 
-trait Form_Error {
+trait  Form_Error {
 
 	/**
 	 * @var array

@@ -74,6 +74,14 @@ function ac_address_count(): int {
 	return (int) $wpdb->get_var("SELECT count(id) FROM {$wpdb->prefix}ac_address" );
 }
 
+function ac_has_address( $id ) {
+	global $wpdb;
+
+	return $wpdb->get_row(
+		$wpdb->prepare("SELECT * FROM {$wpdb->prefix}ac_address WHERE id = %d", $id )
+	);
+}
+
 function ac_delete_address( $id ): mysqli_result|bool|int|null {
 	global $wpdb;
 

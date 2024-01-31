@@ -11,12 +11,14 @@ class Addressbook {
 	public function plugin_page() {
 
 		$action = $_GET['action'] ?? 'list';
+		$id = isset( $_GET['id'] ) ? intval( $_GET['id'] ) : 0;
 
 		switch ( $action ) {
 			case 'new':
 				$template = __DIR__ . '/views/address-new.php';
 				break;
 			case 'edit':
+				$get_address = ac_has_address ( $id );
 				$template = __DIR__ . '/views/address-edit.php';
 				break;
 			case 'view':
