@@ -22,25 +22,48 @@ function ac_insert_address( $args = [] ) {
 		'created_at' => current_time( 'mysql' ),
 	];
 
-	$i_data = wp_parse_args( $args, $defaults );
+	$data = wp_parse_args( $args, $defaults );
 
-	$inserted = $wpdb->insert(
-		"{$wpdb->prefix}ac_address",
-		$i_data,
-		[
-			'%s',
-			'%s',
-			'%s',
-			'%d',
-			'%s'
-		],
-	);
+	if ( isset( $data['id'] ) ) {
 
-	if ( ! $inserted ) {
-		return new \WP_Error( 'failed-to-insert', __( 'Failed to insert', 'wpcrud' ) );
+		$id = $data['id'];
+		unset( $data['id'] );
+
+		$updated = $wpdb->update(
+			"{$wpdb->prefix}ac_address",
+			$data,
+			[ 'id' => $id ],
+			[
+				'%s',
+				'%s',
+				'%s',
+				'%d',
+				'%s'
+			],
+			[ '%d' ]
+		);
+
+		return $updated;
+
+	} else {
+		$inserted = $wpdb->insert(
+			"{$wpdb->prefix}ac_address",
+			$data,
+			[
+				'%s',
+				'%s',
+				'%s',
+				'%d',
+				'%s'
+			],
+		);
+
+		if ( ! $inserted ) {
+			return new \WP_Error( 'failed-to-insert', __( 'Failed to insert', 'wpcrud' ) );
+		}
+
+		return $wpdb->insert_id;
 	}
-
-	return $wpdb->insert_id;
 }
 
 function ac_get_address( $args = [] ) {

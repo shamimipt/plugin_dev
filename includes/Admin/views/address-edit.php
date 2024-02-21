@@ -1,8 +1,6 @@
 <div class="wrap">
 	<h1><?php _e('Edit Address','wpcrud');?></h1>
 
-	<?php var_dump( $get_address );?>
-
 	<form action="" method="post">
 		<table class="form-table">
 			<tbody>
@@ -47,6 +45,7 @@
 			</tr>
 			</tbody>
 		</table>
+        <input type="hidden" name="id" id="id" class="regular-text" value="<?php echo esc_attr( $get_address->id ); ?>">
 		<?php wp_nonce_field('wpcrud-nonce'); ?>
 		<?php submit_button(__('Edit Address','wpcrud'),'primary','submit_address');?>
 	</form>
