@@ -13,5 +13,6 @@ class Admin{
 
 	public function dispatch_actions( $addressbook ) {
 		add_action('admin_init',[$addressbook,'handle_form']);
+		add_action('admin_post_ac-delete-address',[$addressbook,'delete_address']);
 	}
 }

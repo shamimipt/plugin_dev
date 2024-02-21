@@ -105,7 +105,7 @@ function ac_has_address( $id ) {
 	);
 }
 
-function ac_delete_address( $id ): mysqli_result|bool|int|null {
+function ac_delete_address( $id ) {
 	global $wpdb;
 
 	return $wpdb->delete(

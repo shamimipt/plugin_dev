@@ -82,7 +82,32 @@ class Addressbook {
 			wp_die( $insert_id->get_error_message() );
 		}
 
-		$redirected_to = admin_url( 'admin.php?page=wp-crud&inserted=true' );
+		if ( $id ) {
+			$redirected_to = admin_url( 'admin.php?page=wp-crud&action=edit&address-update=true&id=' . $id );
+		} else {
+			$redirected_to = admin_url( 'admin.php?page=wp-crud&inserted=true' );
+		}
+		wp_redirect( $redirected_to );
+		exit;
+	}
+
+	function delete_address() {
+		if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'ac-delete-address' ) ) {
+			wp_die( 'Are you Cheating?' );
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Are You Cheating?' );
+		}
+
+		$id      = isset( $_REQUEST['id'] ) ? intval( $_REQUEST['id'] ) : 0;
+
+
+		if ( ac_delete_address( $id ) ) {
+			$redirected_to = admin_url( 'admin.php?page=wp-crud&address-deleted=true' );
+		} else {
+			$redirected_to = admin_url( 'admin.php?page=wp-crud&address-deleted=false' );
+		}
 		wp_redirect( $redirected_to );
 		exit;
 	}
