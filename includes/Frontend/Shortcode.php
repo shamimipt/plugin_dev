@@ -8,6 +8,8 @@ class Shortcode{
 	}
 
 	public function render_shortcode( $atts, $content="" ){
-		return "Hello From Shortcode";
+		wp_enqueue_style( 'wpcrud-style' );
+		wp_enqueue_script( 'wpcrud-script' );
+		return "<div class='wp-shortcode'>Hello From Shortcode</div>";
 	}
 }

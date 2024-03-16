@@ -8,8 +8,42 @@ class Assets {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
+	function get_scripts() {
+		return [
+			'wpcrud-script' => [
+				'src'     => WP_CRUD_ASSETS . '/js/frontend.js',
+				'version' => filemtime( WP_CRUD_PATH . '/assets/js/frontend.js' ),
+				'deps'    => [ 'jquery' ]
+			]
+		];
+	}
+
+	function get_styles() {
+		return [
+			'wpcrud-style' => [
+				'src'     => WP_CRUD_ASSETS . '/css/frontend.css',
+				'version' => filemtime( WP_CRUD_PATH . '/assets/css/frontend.css' ),
+				'deps'    => []
+			]
+		];
+	}
+
 	function enqueue_assets() {
-		wp_enqueue_script( 'wpcrud-script', WP_CRUD_ASSETS . '/js/frontend.js', false, filemtime( WP_CRUD_PATH . '/assets/js/frontend.js' ), true );
-		wp_enqueue_style( 'wpcrud-style', WP_CRUD_ASSETS . '/css/frontend.css', false, filemtime( WP_CRUD_PATH . '/assets/css/frontend.css' ) );
+
+		$scripts = $this->get_scripts();
+
+		foreach ( $scripts as $handle => $script ) {
+			$deps = isset( $script['deps'] ) ? $script['deps'] : false;
+
+			wp_register_script( $handle, $script['src'], $deps, $script['version'], true );
+		}
+
+		$styles = $this->get_styles();
+
+		foreach ( $styles as $handle => $style ) {
+			$deps = isset( $style['deps'] ) ? $style['deps'] : false;
+
+			wp_register_style( $handle, $style['src'], $deps, $style['version'], );
+		}
 	}
 }
