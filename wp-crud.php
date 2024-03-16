@@ -82,6 +82,9 @@ final class wpCrud {
 	}
 
 	public function init_plugins() {
+
+		new \Shamimipt\WpCrud\Assets();
+
 		if ( is_admin() ) {
 			new \Shamimipt\WpCrud\Admin();
 		} else {
