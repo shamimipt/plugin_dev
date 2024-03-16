@@ -14,7 +14,12 @@ class Assets {
 				'src'     => WP_CRUD_ASSETS . '/js/frontend.js',
 				'version' => filemtime( WP_CRUD_PATH . '/assets/js/frontend.js' ),
 				'deps'    => [ 'jquery' ]
-			]
+			],
+			'wp-enquiry-js' => [
+				'src'     => WP_CRUD_ASSETS . '/js/enquiry.js',
+				'version' => filemtime( WP_CRUD_PATH . '/assets/js/enquiry.js' ),
+				'deps'    => [ 'jquery' ]
+			],
 		];
 	}
 
@@ -24,7 +29,13 @@ class Assets {
 				'src'     => WP_CRUD_ASSETS . '/css/frontend.css',
 				'version' => filemtime( WP_CRUD_PATH . '/assets/css/frontend.css' ),
 				'deps'    => []
-			]
+			],
+			'wp-enquiry-css' => [
+				'src'     => WP_CRUD_ASSETS . '/css/enquiry.css',
+				'version' => filemtime( WP_CRUD_PATH . '/assets/css/enquiry.css' ),
+				'deps'    => []
+			],
+
 		];
 	}
 
@@ -43,7 +54,7 @@ class Assets {
 		foreach ( $styles as $handle => $style ) {
 			$deps = isset( $style['deps'] ) ? $style['deps'] : false;
 
-			wp_register_style( $handle, $style['src'], $deps, $style['version'], );
+			wp_register_style( $handle, $style['src'], $deps, $style['version']);
 		}
 	}
 }
