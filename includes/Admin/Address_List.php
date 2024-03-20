@@ -52,8 +52,8 @@ class Address_List extends \WP_List_Table {
 		);
 
 		$action['delete'] = sprintf(
-			'<a href="%s" class="submitdelete" onclick="return confirm(\'Are You Sure?\');" title="%s">%s</a>',
-			wp_nonce_url( admin_url( 'admin-post.php?&action=ac-delete-address&id=' . $item->id ), 'ac-delete-address' ),
+			'<a href="#" class="submitdelete" data-id="%s"  title="%s">%s</a>',
+			 $item->id ,
 			__( 'Delete', 'wpcrud' ),
 			__( 'Delete', 'wpcrud' ),
 		);

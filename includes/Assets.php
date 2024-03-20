@@ -20,6 +20,11 @@ class Assets {
 				'version' => filemtime( WP_CRUD_PATH . '/assets/js/enquiry.js' ),
 				'deps'    => [ 'jquery' ]
 			],
+			'wp-crud-admin-js' => [
+				'src'     => WP_CRUD_ASSETS . '/js/admin.js',
+				'version' => filemtime( WP_CRUD_PATH . '/assets/js/admin.js' ),
+				'deps'    => [ 'jquery', 'wp-util' ]
+			],
 		];
 	}
 
@@ -60,6 +65,12 @@ class Assets {
 		wp_localize_script('wp-enquiry-js', 'wpCrud', [
 			'ajaxurl' => admin_url('admin-ajax.php'),
 			'error'   => __('Something Went Wrong', 'wpcrud'),
+		]);
+
+		wp_localize_script('wp-crud-admin-js', 'wpCrud', [
+			'nonce' => wp_create_nonce('ac_admin_nonce'),
+			'confirm' => __('Are Your Sure', 'wpcrud'),
+			'error' => __('Something went wrong', 'wpcrud'),
 		]);
 	}
 }
