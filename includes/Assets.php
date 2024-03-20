@@ -56,5 +56,10 @@ class Assets {
 
 			wp_register_style( $handle, $style['src'], $deps, $style['version']);
 		}
+
+		wp_localize_script('wp-enquiry-js', 'wpCrud', [
+			'ajaxurl' => admin_url('admin-ajax.php'),
+			'error'   => __('Something Went Wrong', 'wpcrud'),
+		]);
 	}
 }

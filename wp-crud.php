@@ -85,6 +85,10 @@ final class wpCrud {
 
 		new \Shamimipt\WpCrud\Assets();
 
+		if ( defined('DOING_AJAX') && DOING_AJAX ) {
+			new \Shamimipt\WpCrud\Ajax();
+		}
+
 		if ( is_admin() ) {
 			new \Shamimipt\WpCrud\Admin();
 		} else {

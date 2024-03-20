@@ -11,6 +11,8 @@ class Enquiry{
 		wp_enqueue_style( 'wp-enquiry-css' );
 		wp_enqueue_script( 'wp-enquiry-js' );
 
-		return "<div class='wp-shortcode'>Hello From enquiry</div>";
+		ob_start();
+		include  __DIR__ . "/views/enquiry.php";
+		return ob_get_clean();
 	}
 }
