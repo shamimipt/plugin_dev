@@ -84,6 +84,7 @@ final class wpCrud {
 	public function init_plugins() {
 
 		new \Shamimipt\WpCrud\Assets();
+		new \Shamimipt\WpCrud\API();
 
 		if ( defined('DOING_AJAX') && DOING_AJAX ) {
 			new \Shamimipt\WpCrud\Ajax();
