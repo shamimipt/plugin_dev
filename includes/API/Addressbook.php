@@ -24,9 +24,43 @@ class Addressbook extends WP_REST_Controller {
 					'permission_callback' => [ $this, 'get_items_permission_check' ],
 					'args'                => $this->get_collection_params(),
 				],
+				[
+					'methods'   => WP_REST_Server::CREATABLE,
+					'callback' => [ $this, 'create_item' ],
+					'permission_callback' => [ $this, 'create_item_permission_check' ],
+					'args' => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				],
 				'schema' => [ $this, 'get_item_schema' ],
 			]
 		);
+	}
+
+	public function create_item_permissions_check( $request ) {
+		return $this->get_items_permission_check( $request );
+	}
+
+	public function create_item( $request ) {
+		 $contact = $this->prepare_item_for_database( $request );
+
+		 if ( is_wp_error( $contact ) ) {
+		 	return $contact;
+		 }
+
+		 $contact_id = ac_insert_address( $contact );
+
+		 if ( is_wp_error( $contact_id ) ) {
+		 	$contact_id->add_data( [ 'status' => 400 ] );
+		 	return $contact_id;
+		 }
+
+		 $contact = $this->get_contacts( $contact_id );
+		 $response = $this->prepare_item_for_response( $contact, $request );
+
+		 $response->set_status( 201 );
+		 $response->header('Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $contact_id ) ) );
+
+		 return rest_ensure_response( $response );
+
 	}
 
 	public function get_items_permission_check( $request ): bool {
@@ -34,6 +68,31 @@ class Addressbook extends WP_REST_Controller {
 			return true;
 		}
 		return false;
+	}
+
+	public function get_contacts( $id ) {
+		$contact = ac_get_address( $id );
+
+		if ( ! $contact ) {
+			return new \WP_Error(
+				'rest_contact_invalid_id',
+				__( 'Invalid contact ID.' ),
+				[ 'status' => 404 ]
+			);
+		}
+		return $contact;
+	}
+
+	public function get_item_permissions_check( $request ) {
+		if ( !current_user_can('manage_options') ) {
+			return false;
+		}
+		
+		$contact = $this->get_contacts( $request['id'] );
+		
+		if ( is_wp_error( $contact ) ) {
+			return $contact;
+		}
 	}
 
 	public function get_items( $request ) {
