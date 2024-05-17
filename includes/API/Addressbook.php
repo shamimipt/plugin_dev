@@ -8,7 +8,7 @@ use WP_REST_Server;
 
 class Addressbook extends WP_REST_Controller {
 
-	function __construct(){
+	function __construct() {
 		$this->namespace = 'wpcrud/v1';
 		$this->rest_base = 'contacts';
 	}
@@ -21,13 +21,13 @@ class Addressbook extends WP_REST_Controller {
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items' ],
-					'permission_callback' => [ $this, 'get_items_permission_check' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 					'args'                => $this->get_collection_params(),
 				],
 				[
 					'methods'   => WP_REST_Server::CREATABLE,
 					'callback' => [ $this, 'create_item' ],
-					'permission_callback' => [ $this, 'create_item_permission_check' ],
+					'permission_callback' => [ $this, 'create_item_permissions_check' ],
 					'args' => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				],
 				'schema' => [ $this, 'get_item_schema' ],
@@ -36,38 +36,58 @@ class Addressbook extends WP_REST_Controller {
 	}
 
 	public function create_item_permissions_check( $request ) {
-		return $this->get_items_permission_check( $request );
+		return $this->get_items_permissions_check( $request );
 	}
 
 	public function create_item( $request ) {
-		 $contact = $this->prepare_item_for_database( $request );
+		$contact = $this->prepare_item_for_database( $request );
 
-		 if ( is_wp_error( $contact ) ) {
-		 	return $contact;
-		 }
+		if ( is_wp_error( $contact ) ) {
+			return $contact;
+		}
 
-		 $contact_id = ac_insert_address( $contact );
+		$contact_id = ac_insert_address( $contact );
 
-		 if ( is_wp_error( $contact_id ) ) {
-		 	$contact_id->add_data( [ 'status' => 400 ] );
-		 	return $contact_id;
-		 }
+		if ( is_wp_error( $contact_id ) ) {
+			$contact_id->add_data( [ 'status' => 400 ] );
 
-		 $contact = $this->get_contacts( $contact_id );
-		 $response = $this->prepare_item_for_response( $contact, $request );
+			return $contact_id;
+		}
 
-		 $response->set_status( 201 );
-		 $response->header('Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $contact_id ) ) );
+		$contact  = $this->get_contacts( $contact_id );
+		$response = $this->prepare_item_for_response( $contact, $request );
 
-		 return rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $contact_id ) ) );
+
+		return rest_ensure_response( $response );
 
 	}
 
-	public function get_items_permission_check( $request ): bool {
-		if ( current_user_can( 'manage_options' ) ) {
-			return true;
+	protected function prepare_item_for_database( $request ) {
+		$prepared = [];
+
+		if ( isset( $request['name'] ) ) {
+			$prepared['name'] = $request['name'];
 		}
-		return false;
+
+		if ( isset( $request['address'] ) ) {
+			$prepared['address'] = $request['address'];
+		}
+
+		if ( isset( $request['phone'] ) ) {
+			$prepared['phone'] = $request['phone'];
+		}
+
+		return $prepared;
+	}
+
+	public function get_items_permissions_check( $request ): bool {
+		if ( current_user_can( 'manage_options' ) ) {
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 	public function get_contacts( $id ) {
@@ -80,23 +100,24 @@ class Addressbook extends WP_REST_Controller {
 				[ 'status' => 404 ]
 			);
 		}
+
 		return $contact;
 	}
 
 	public function get_item_permissions_check( $request ) {
-		if ( !current_user_can('manage_options') ) {
-			return false;
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return FALSE;
 		}
-		
+
 		$contact = $this->get_contacts( $request['id'] );
-		
+
 		if ( is_wp_error( $contact ) ) {
 			return $contact;
 		}
 	}
 
 	public function get_items( $request ) {
-		$args = [];
+		$args   = [];
 		$params = $this->get_collection_params();
 		foreach ( $params as $key => $value ) {
 			if ( isset( $request[ $key ] ) ) {
@@ -110,15 +131,15 @@ class Addressbook extends WP_REST_Controller {
 		unset( $args['per_page'] );
 		unset( $args['page'] );
 
-		$data = [];
+		$data     = [];
 		$contacts = ac_get_address( $args );
 
 		foreach ( $contacts as $contact ) {
 			$response = $this->prepare_item_for_response( $contact, $request );
-			$data[] = $this->prepare_response_for_collection( $response );
+			$data[]   = $this->prepare_response_for_collection( $response );
 		}
 
-		$total = ac_address_count();
+		$total     = ac_address_count();
 		$max_pages = ceil( $total / (int) $args['number'] );
 
 		$response = rest_ensure_response( $data );
@@ -130,31 +151,31 @@ class Addressbook extends WP_REST_Controller {
 	}
 
 	public function prepare_item_for_response( $item, $request ) {
-		$data = [];
+		$data   = [];
 		$fields = $this->get_fields_for_response( $request );
 
-		if ( in_array( 'id', $fields, true ) ) {
+		if ( in_array( 'id', $fields, TRUE ) ) {
 			$data['id'] = (int) $item->id;
 		}
 
-		if ( in_array( 'name', $fields, true ) ) {
+		if ( in_array( 'name', $fields, TRUE ) ) {
 			$data['name'] = $item->name;
 		}
 
-		if ( in_array( 'address', $fields, true ) ) {
+		if ( in_array( 'address', $fields, TRUE ) ) {
 			$data['address'] = $item->address;
 		}
 
-		if ( in_array( 'phone', $fields, true ) ) {
+		if ( in_array( 'phone', $fields, TRUE ) ) {
 			$data['phone'] = $item->phone;
 		}
 
-		if ( in_array( 'date', $fields, true ) ) {
+		if ( in_array( 'date', $fields, TRUE ) ) {
 			$data['date'] = mysql_to_rfc3339( $item->created_at );
 		}
 
-		$context = !empty( $request['context'] ) ? $request['context'] : 'view';
-		$data = $this->filter_response_by_context($data, $context);
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->filter_response_by_context( $data, $context );
 
 		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $item ) );
@@ -164,10 +185,10 @@ class Addressbook extends WP_REST_Controller {
 
 	#[ArrayShape( [ 'self' => "array", 'collection' => "array" ] )]
 	protected function prepare_links( $item ): array {
-		$base = sprintf('%s/%s', $this->namespace, $this->rest_base);
+		$base = sprintf( '%s/%s', $this->namespace, $this->rest_base );
 
 		$links = [
-			'self' => [
+			'self'       => [
 				'href' => rest_url( trailingslashit( $base ) . $item->id ),
 			],
 			'collection' => [
@@ -188,17 +209,17 @@ class Addressbook extends WP_REST_Controller {
 			'title'      => 'contact',
 			'type'       => 'object',
 			'properties' => [
-				'id' => [
+				'id'      => [
 					'description' => __( 'Unique identifier for the object' ),
 					'type'        => 'integer',
 					'context'     => [ 'view', 'edit' ],
-					'readonly'    => true,
+					'readonly'    => TRUE,
 				],
-				'name' => [
+				'name'    => [
 					'description' => __( 'Name of the contact' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
-					'required'    => true,
+					'required'    => TRUE,
 					'arg_options' => [
 						'sanitize_callback' => 'sanitize_text_field',
 					],
@@ -211,24 +232,24 @@ class Addressbook extends WP_REST_Controller {
 						'sanitize_callback' => 'sanitize_textarea_field',
 					],
 				],
-				'phone' => [
+				'phone'   => [
 					'description' => __( 'Phone Number of the contact' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
-					'required'    => true,
+					'required'    => TRUE,
 					'arg_options' => [
 						'sanitize_callback' => 'sanitize_text_field',
 					],
 				],
-				'date' => [
+				'date'    => [
 					'description' => __( 'The date the object was published, in the site\'s time' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => [ 'view' ],
-					'readonly'    => true,
+					'readonly'    => TRUE,
 				],
 
-			]
+			],
 		];
 
 		$this->schema = $schema;
@@ -236,11 +257,12 @@ class Addressbook extends WP_REST_Controller {
 		return $this->add_additional_fields_schema( $this->schema );
 	}
 
-	public function  get_collection_params(): array {
+	public function get_collection_params(): array {
 		$params = parent::get_collection_params();
 
 		unset( $params['search'] );
 
 		return $params;
 	}
+
 }
