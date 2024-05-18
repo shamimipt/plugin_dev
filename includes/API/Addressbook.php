@@ -3,6 +3,7 @@
 namespace Shamimipt\WpCrud\API;
 
 use JetBrains\PhpStorm\ArrayShape;
+use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Server;
 
@@ -51,6 +52,12 @@ class Addressbook extends WP_REST_Controller {
 					'args'                => [
 						'context' => $this->get_context_param( [ 'default' => 'view' ] ),
 					],
+				],
+				[
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => [ $this, 'update_item' ],
+					'permission_callback' => [ $this, 'update_item_permissions_check' ],
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				],
 				'schema' => [ $this, 'get_item_schema' ],
 			],
@@ -164,6 +171,32 @@ class Addressbook extends WP_REST_Controller {
 
 		return rest_ensure_response( $response );
 
+	}
+
+	public function update_item_permissions_check( $request ) {
+		return $this->get_item_permissions_check( $request );
+	}
+
+	public function update_item( $request ) {
+		$contact  = $this->get_contact( $request['id'] );
+		$prepared = $this->prepare_item_for_database( $request );
+
+		$prepared = array_merge( (array) $contact, $prepared );
+
+		$updated = ac_insert_address( $prepared );
+
+		if ( ! $updated ) {
+			return new WP_Error(
+				'rest_not_updated',
+				__( 'Sorry, the address could not be updated.' ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		$contact  = $this->get_contact( $request['id'] );
+		$response = $this->prepare_item_for_response( $contact, $request );
+
+		return rest_ensure_response( $response );
 	}
 
 	protected function prepare_item_for_database( $request ) {
