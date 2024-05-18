@@ -59,6 +59,11 @@ class Addressbook extends WP_REST_Controller {
 					'permission_callback' => [ $this, 'update_item_permissions_check' ],
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				],
+				[
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => [ $this, 'delete_item' ],
+					'permission_callback' => [ $this, 'delete_item_permissions_check' ],
+				],
 				'schema' => [ $this, 'get_item_schema' ],
 			],
 		);
@@ -197,6 +202,32 @@ class Addressbook extends WP_REST_Controller {
 		$response = $this->prepare_item_for_response( $contact, $request );
 
 		return rest_ensure_response( $response );
+	}
+
+	public function delete_item_permissions_check( $request ) {
+		return $this->get_item_permissions_check( $request );
+	}
+
+	public function delete_item( $request ) {
+		$contact  = $this->get_contact( $request['id'] );
+		$previous = $this->prepare_item_for_response( $contact, $request );
+
+		$deleted = ac_delete_address( $request['id'] );
+
+		if ( ! $deleted ) {
+			return new WP_Error(
+				'rest_not_deleted',
+				__( 'Sorry, the address could not be deleted.' ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		$data = [
+			'deleted'  => true,
+			'previous' => $previous->get_data(),
+		];
+
+		return rest_ensure_response( $data );
 	}
 
 	protected function prepare_item_for_database( $request ) {
