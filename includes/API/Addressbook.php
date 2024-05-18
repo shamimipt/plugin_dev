@@ -33,87 +33,37 @@ class Addressbook extends WP_REST_Controller {
 				'schema' => [ $this, 'get_item_schema' ],
 			]
 		);
-	}
 
-	public function create_item_permissions_check( $request ) {
-		return $this->get_items_permissions_check( $request );
-	}
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			[
+				'args'   => [
+					'id' => [
+						'description' => __( 'Unique identifier for the object.' ),
+						'type'        => 'integer',
+					],
+				],
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_item' ],
+					'permission_callback' => [ $this, 'get_item_permissions_check' ],
+					'args'                => [
+						'context' => $this->get_context_param( [ 'default' => 'view' ] ),
+					],
+				],
+				'schema' => [ $this, 'get_item_schema' ],
+			],
+		);
 
-	public function create_item( $request ) {
-		$contact = $this->prepare_item_for_database( $request );
-
-		if ( is_wp_error( $contact ) ) {
-			return $contact;
-		}
-
-		$contact_id = ac_insert_address( $contact );
-
-		if ( is_wp_error( $contact_id ) ) {
-			$contact_id->add_data( [ 'status' => 400 ] );
-
-			return $contact_id;
-		}
-
-		$contact  = $this->get_contacts( $contact_id );
-		$response = $this->prepare_item_for_response( $contact, $request );
-
-		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $contact_id ) ) );
-
-		return rest_ensure_response( $response );
-
-	}
-
-	protected function prepare_item_for_database( $request ) {
-		$prepared = [];
-
-		if ( isset( $request['name'] ) ) {
-			$prepared['name'] = $request['name'];
-		}
-
-		if ( isset( $request['address'] ) ) {
-			$prepared['address'] = $request['address'];
-		}
-
-		if ( isset( $request['phone'] ) ) {
-			$prepared['phone'] = $request['phone'];
-		}
-
-		return $prepared;
 	}
 
 	public function get_items_permissions_check( $request ): bool {
 		if ( current_user_can( 'manage_options' ) ) {
-			return TRUE;
+			return true;
 		}
 
-		return FALSE;
-	}
-
-	public function get_contacts( $id ) {
-		$contact = ac_get_address( $id );
-
-		if ( ! $contact ) {
-			return new \WP_Error(
-				'rest_contact_invalid_id',
-				__( 'Invalid contact ID.' ),
-				[ 'status' => 404 ]
-			);
-		}
-
-		return $contact;
-	}
-
-	public function get_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return FALSE;
-		}
-
-		$contact = $this->get_contacts( $request['id'] );
-
-		if ( is_wp_error( $contact ) ) {
-			return $contact;
-		}
+		return false;
 	}
 
 	public function get_items( $request ) {
@@ -150,27 +100,111 @@ class Addressbook extends WP_REST_Controller {
 		return $response;
 	}
 
+	public function get_contact( $id ) {
+		$contact = ac_get_address( $id );
+
+		if ( ! $contact ) {
+			return new \WP_Error(
+				'rest_contact_invalid_id',
+				__( 'Invalid contact ID.' ),
+				[ 'status' => 404 ]
+			);
+		}
+
+		return $contact;
+	}
+
+	public function get_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
+		$contact = $this->get_contact( $request['id'] );
+
+		if ( is_wp_error( $contact ) ) {
+			return $contact;
+		}
+
+		return true;
+	}
+
+	public function get_item( $request ) {
+		$contact = $this->get_contact( $request['id'] );
+
+		$response = $this->prepare_item_for_response( $contact, $request );
+		$response = rest_ensure_response( $response );
+
+		return $response;
+	}
+
+	public function create_item_permissions_check( $request ) {
+		return $this->get_items_permissions_check( $request );
+	}
+
+	public function create_item( $request ) {
+		$contact = $this->prepare_item_for_database( $request );
+
+		if ( is_wp_error( $contact ) ) {
+			return $contact;
+		}
+
+		$contact_id = ac_insert_address( $contact );
+
+		if ( is_wp_error( $contact_id ) ) {
+			$contact_id->add_data( [ 'status' => 400 ] );
+
+			return $contact_id;
+		}
+
+		$contact  = $this->get_contact( $contact_id );
+		$response = $this->prepare_item_for_response( $contact, $request );
+
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $contact_id ) ) );
+
+		return rest_ensure_response( $response );
+
+	}
+
+	protected function prepare_item_for_database( $request ) {
+		$prepared = [];
+
+		if ( isset( $request['name'] ) ) {
+			$prepared['name'] = $request['name'];
+		}
+
+		if ( isset( $request['address'] ) ) {
+			$prepared['address'] = $request['address'];
+		}
+
+		if ( isset( $request['phone'] ) ) {
+			$prepared['phone'] = $request['phone'];
+		}
+
+		return $prepared;
+	}
+
 	public function prepare_item_for_response( $item, $request ) {
 		$data   = [];
 		$fields = $this->get_fields_for_response( $request );
 
-		if ( in_array( 'id', $fields, TRUE ) ) {
+		if ( in_array( 'id', $fields, true ) ) {
 			$data['id'] = (int) $item->id;
 		}
 
-		if ( in_array( 'name', $fields, TRUE ) ) {
+		if ( in_array( 'name', $fields, true ) ) {
 			$data['name'] = $item->name;
 		}
 
-		if ( in_array( 'address', $fields, TRUE ) ) {
+		if ( in_array( 'address', $fields, true ) ) {
 			$data['address'] = $item->address;
 		}
 
-		if ( in_array( 'phone', $fields, TRUE ) ) {
+		if ( in_array( 'phone', $fields, true ) ) {
 			$data['phone'] = $item->phone;
 		}
 
-		if ( in_array( 'date', $fields, TRUE ) ) {
+		if ( in_array( 'date', $fields, true ) ) {
 			$data['date'] = mysql_to_rfc3339( $item->created_at );
 		}
 
