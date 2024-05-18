@@ -25,10 +25,10 @@ class Addressbook extends WP_REST_Controller {
 					'args'                => $this->get_collection_params(),
 				],
 				[
-					'methods'   => WP_REST_Server::CREATABLE,
-					'callback' => [ $this, 'create_item' ],
-					'permission_callback' => [ $this, 'create_item_permissions_check' ],
-					'args' => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'create_item' ],
+					'permission_callback' => [ $this, 'create_item_permissions_check', ],
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				],
 				'schema' => [ $this, 'get_item_schema' ],
 			]
@@ -101,7 +101,7 @@ class Addressbook extends WP_REST_Controller {
 	}
 
 	public function get_contact( $id ) {
-		$contact = ac_get_address( $id );
+		$contact = ac_has_address( $id );
 
 		if ( ! $contact ) {
 			return new \WP_Error(
